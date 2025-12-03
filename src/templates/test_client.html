@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>YOLO WebSocket Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+  </head>
+  <body>
+    <h2>YOLO v8 via Flask-SocketIO</h2>
+    <input type="file" id="fileInput" accept="image/*" />
+    <br /><br />
+    <div style="display: flex; gap: 20px">
+      <div>
+        <h3>Original</h3>
+        <img id="original" style="max-width: 400px" />
+      </div>
+      <div>
+        <h3>Prediction (Annotated)</h3>
+        <img id="result" style="max-width: 400px" />
+      </div>
+    </div>
+    <pre id="jsonResult"></pre>
+
+    <script>
+      const socket = io("http://localhost:5000");
+
+      socket.on("connect", () => {
+        console.log("Connected to server");
+      });
+
+      socket.on("prediction_result", (data) => {
+        console.log("Result received", data);
+        document.getElementById("result").src = data.annotated_image;
+        document.getElementById("jsonResult").innerText = JSON.stringify(
+          data.detections,
+          null,
+          2
+        );
+      });
+
+      document
+        .getElementById("fileInput")
+        .addEventListener("change", function (e) {
+          const file = e.target.files[0];
+          const reader = new FileReader();
+
+          reader.onload = function (evt) {
+            const base64Img = evt.target.result;
+            document.getElementById("original").src = base64Img;
+
+            // Kirim ke server via WebSocket
+            socket.emit("predict_image", { image: base64Img });
+          };
+
+          if (file) {
+            reader.readAsDataURL(file);
+          }
+        });
+    </script>
+  </body>
+</html>
