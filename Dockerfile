@@ -8,13 +8,13 @@ WORKDIR /app
 
 # Install system build deps required by some scientific packages
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-       build-essential \
-       gcc \
-       gfortran \
-       libatlas-base-dev \
-       liblapack-dev \
-    && rm -rf /var/lib/apt/lists/*
+     && apt-get install -y --no-install-recommends \
+         build-essential \
+         gcc \
+         gfortran \
+         libopenblas-dev \
+         liblapack-dev \
+     && rm -rf /var/lib/apt/lists/*
 
 # Install Python requirements
 COPY requirements.txt ./
